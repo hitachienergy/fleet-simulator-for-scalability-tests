@@ -80,7 +80,7 @@ Corporation:
 
 ### Annex A
 
-Apache-2.0 license
+MIT license
 
 ### Annex B
 
