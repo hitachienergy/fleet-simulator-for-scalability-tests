@@ -1,0 +1,46 @@
+server: 
+  address: "localhost:8080" # required
+  docker_compose: "path/to/docker/compose" # required
+  setup: 
+    script: ["/bin/bash", "path/to/script"]
+    args: 
+      arg1: value1
+  trigger:
+    script:  ["/bin/bash", "path/to/script"]
+    args: 
+		  arg1: value1
+  finish:
+    script:  ["/bin/bash", "path/to/script"]
+client: 
+  namePrefix: simulated # required
+	number: 2000 # required
+  template: "path/to/client/class" # required
+	factory: ClientFactory # required
+	args:
+    arg1: value1
+    httpPoolSize: 1000
+  network: "device-default" # for device-side network simulation
+  mode: # required
+    type: hybrid
+    containerNum: 10 
+network: 
+  container_name:
+    rate: 100mbps
+    delay: 10ms
+    loss: 10%
+    duplicate: 10%
+    corrupt: 10%
+simulation: 
+  task: "ota-update"
+  dummy_work:
+    flag1:
+      number: 10 # privileged
+      percentage: 10%
+      duration: 2
+      variation: 1
+  crash:
+    flag2:
+      number: 1
+  seed: 1
+output: 
+  path: "path/to/file"

@@ -1,0 +1,47 @@
+target: "thingsboard"
+timeout: 2h
+logLevel: "debug"
+server:
+  driver: "/home/gismo/fist_workspace/scalability-report/codes/thingsboard/fist_drivers/handler.py"
+  endpoint: "localhost:8080"
+  devicesEndpoint: "docker-mytb-1:9090"
+  dockerCompose: "/home/gismo/fist_workspace/scalability-report/codes/thingsboard/docker/docker-compose-kafka.yml"
+
+client:
+  containerStartMode: "sequential" # parallel, sequential
+  devicesRegisterMode: "sequential" # parallel, sequential
+  numberOfContainers: 5
+  numberOfDevices: 100
+
+  namePrefix: "http"
+  template: "/home/gismo/fist_workspace/scalability-report/scalability-tools/client/examples/thingsboard"
+  factory: TBHTTPDefaultFactory
+  network: docker_default
+  args:
+    pollDelay: 30
+    # httpPoolSize: 1
+
+simulation:
+  task: "ota-update"
+  args:
+    path: "/home/gismo/fist_workspace/scalability-report/data/ota-update-files"
+    firmware: "32MB.txt"
+  dummyWork:
+    percent: 10% # percentage of affected devices
+    duration: 10s # task duration in seconds
+    variation: 1s # task duration variability in seconds 
+    period: 30s
+  crash:
+    number: 5
+    within: 0
+  seed: 1 # random generator seed
+
+network:
+  delay: 50ms
+  loss: 2%
+  corrupt: 1% # corruption is extremely rare, more like 0.1%
+  duplicate: 2%
+  rate: 40mbps
+  
+output:
+  path: "/home/gismo/fist_workspace/scalability-report/data/results"

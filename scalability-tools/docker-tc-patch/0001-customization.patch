@@ -1,0 +1,74 @@
+From 4403eaae72f9c5752cd2de5ad5389de1ba397e30 Mon Sep 17 00:00:00 2001
+From: "fabio.muratori" <fabio.muratori@hitachienergy.com>
+Date: Wed, 17 Jan 2024 11:19:03 +0100
+Subject: [PATCH] chore: add configurable fields for linux tc qdisc policies
+
+---
+ .env               | 7 ++++++-
+ Dockerfile         | 4 +++-
+ bin/tc-common.sh   | 3 ++-
+ docker-compose.yml | 2 ++
+ 4 files changed, 13 insertions(+), 3 deletions(-)
+
+diff --git a/.env b/.env
+index f76eedd..3591a18 100644
+--- a/.env
++++ b/.env
+@@ -3,4 +3,9 @@
+ 
+ # HTTP
+ HTTP_BIND=127.0.0.1
+-HTTP_PORT=4080
+\ No newline at end of file
++HTTP_PORT=4080
++
++
++# Traffic Control
++TC_QDISC_TBF_BURST=5kb
++TC_QDISC_TBF_LATENCY=50ms
+\ No newline at end of file
+diff --git a/Dockerfile b/Dockerfile
+index 807f3d4..4b1c356 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -42,7 +42,9 @@ ENV DOCKER_TC_VERSION="${VERSION:-dev}" \
+     S6_KILL_GRACETIME=0 \
+     S6_KILL_FINISH_MAXTIME=0 \
+     S6_KEEP_ENV=1 \
+-    S6_BEHAVIOUR_IF_STAGE2_FAILS=2
++    S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
++    TC_QDISC_TBF_BURST=5kb \
++    TC_QDISC_TBF_LATENCY=50ms
+ LABEL maintainer="Łukasz Lach <llach@llach.pl>" \
+       org.opencontainers.image.title="docker-tc" \
+       org.opencontainers.image.description="Docker Traffic Control" \
+diff --git a/bin/tc-common.sh b/bin/tc-common.sh
+index 3035822..44c9103 100755
+--- a/bin/tc-common.sh
++++ b/bin/tc-common.sh
+@@ -24,6 +24,7 @@ qdisc_netm() {
+ qdisc_tbf() {
+     IF="$1"
+     shift
+-    tc qdisc add dev "$IF" $QDISC_HANDLE tbf burst 5kb latency 50ms $@
++    echo "tc qdisc add dev \"$IF\" $QDISC_HANDLE tbf burst $TC_QDISC_TBF_BURST latency $TC_QDISC_TBF_LATENCY $@"
++    tc qdisc add dev "$IF" $QDISC_HANDLE tbf burst $TC_QDISC_TBF_BURST latency $TC_QDISC_TBF_LATENCY $@
+     qdisc_next
+ }
+\ No newline at end of file
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 67f7fe9..c3203cf 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -16,6 +16,8 @@ services:
+     environment:
+       HTTP_BIND: "${HTTP_BIND:-127.0.0.1}"
+       HTTP_PORT: "${HTTP_PORT:-4080}"
++      TC_QDISC_TBF_BURST: "${TC_QDISC_TBF_BURST:5kb}"
++      TC_QDISC_TBF_LATENCY: "${TC_QDISC_TBF_LATENCY:50ms}"
+     network_mode: host
+ 
+ networks:
+-- 
+2.34.1
+

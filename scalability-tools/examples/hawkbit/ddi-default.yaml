@@ -1,0 +1,49 @@
+target: "hawkbit"
+timeout: 2h
+logLevel: "debug"
+server:
+  driver: "/home/gismo/fist_workspace/scalability-report/codes/hawkbit/fist_drivers/handler.py"
+  endpoint: "localhost:8080"
+  devicesEndpoint: "hawkbit-hawkbit-1:8080"
+  dockerCompose: "/home/gismo/fist_workspace/scalability-report/codes/hawkbit/hawkbit-docker-compose.yml"
+
+client:
+  containerStartMode: "sequential" # parallel, sequential
+  devicesRegisterMode: "sequential" # parallel, sequential
+  numberOfContainers: 5
+  numberOfDevices: 100
+
+  network: hawkbit_default
+  namePrefix: "ddi"
+  template: "/home/gismo/fist_workspace/scalability-report/scalability-tools/client/examples/hawkbit"
+  factory: HawkbitDDIDefaultFactory
+  args:
+    tenant: "DEFAULT"
+    pollDelay: 30
+    gatewayToken: "simulation-gateway-token"
+    # httpPoolSize: 100
+
+simulation:
+  task: "ota-update"
+  args:
+    path: "/home/gismo/fist_workspace/scalability-report/data/ota-update-files"
+    firmware: "32MB.txt"
+  dummyWork:
+    percent: 10% # percentage of affected devices
+    duration: 10s # task duration in seconds
+    variation: 1s # task duration variability in seconds 
+    period: 30s
+  crash:
+    number: 5
+    within: 0
+  seed: 1 # random generator seed
+
+network:
+  delay: 50ms
+  loss: 2%
+  corrupt: 1% # corruption is extremely rare, more like 0.1%
+  duplicate: 2%
+  rate: 40mbps
+
+output:
+  path: "/home/gismo/fist_workspace/scalability-report/data/results"

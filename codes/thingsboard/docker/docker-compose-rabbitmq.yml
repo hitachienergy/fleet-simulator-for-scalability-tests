@@ -1,0 +1,21 @@
+version: '3.0'
+services:
+  mytb:
+    restart: always
+    image: "thingsboard/tb-cassandra"
+    ports:
+      - "8080:9090"
+      - "1883:1883"
+      - "7070:7070"
+      - "5683-5688:5683-5688/udp"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      TB_QUEUE_TYPE: rabbitmq
+      TB_QUEUE_RABBIT_MQ_USERNAME: admin
+      TB_QUEUE_RABBIT_MQ_PASSWORD: admin
+      TB_QUEUE_RABBIT_MQ_HOST: host.docker.internal
+      TB_QUEUE_RABBIT_MQ_PORT: 5672
+    volumes:
+      - ~/.mytb-data:/data
+      - ~/.mytb-logs:/var/log/thingsboard
